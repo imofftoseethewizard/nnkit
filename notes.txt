@@ -1,0 +1,80 @@
+Neural Net Kit
+--------------
+
+layers
+  neuron
+  objective
+  input
+  output
+  sampling
+  processing
+  
+dendrite types
+  complete
+  local
+  convolution
+  sparse
+
+synapse functions
+
+training algorithms
+  supervised -- backprop
+  unsupervised -- rbm
+
+Recurrent Neural Network
+
+Let f be the componentwise nonlinear transfer function of the network.
+Let x be the input vector, and let y be the correct output vector.
+
+Define
+  v_{0;0} = A_0 * x + b_0
+  y_{0;0} = f(v_{0;0})
+
+  v_{0;1} = A_1 * y_{0;0} + b_1
+  y_{0;1} = f(v_{0;1})
+
+  e_{0;1} = 1/2 [y_{0;1} - y]^2
+
+Where the A_i are matrices and the b_i are column vectors, and where []^2 represents componentwise
+squaring.  The v_{0;i} are the synaptic inputs, the y_{0;i} are the layer activations, and the e_i
+are the errors.
+
+Then for t > 0, define
+
+  v_{t;0} = (D_0 * y_{t-1;1} + A_0) * x + B_0 * y_{t-1;1} + b_0
+  y_{t;0} = f(v_{t;0})
+
+  v_{t;1} = A_1 * y_{t;0} + b_1
+  y_{t;1} = f(v_{t;1})
+
+  e_{t;1} = 1/2 [y_{t;1} - y]^2
+
+Backpropagation Delta Rule
+
+Formulas for de_{0;1}/dA_0, de_{0;1}/db_0, de_{t;1}/dD_0, de_{t;1}/dB_0, de_{t;1}/dA_1, and
+de_{t;1}/db_1.
+
+  {de_{t;1}/db_1}_i = {d(f(v_{0;1}))/db_1}_i
+                    = f'({v_{0;1}}_i) * {d(v_{0;1})/db_1}_i
+                    = {db_1}_i * f'({v_{0;1}}_i)
+
+  {de_{t;1}/dA_1}_i = {d(f(v_{0;1}))/dA_1}_i
+                    = f'({v_{0;1}}_i) * {d(v_{0;1})/dA_1}_i
+                    = f'({v_{0;1}}_i) * sum over j A_{j, i} * {y_0;0}_j
+
+  e_{t;0} = 
+  
+
+
+Dy + A + E = (Dy + E) + A = 
+
+Dy + E = Fy
+E = (F - D)y
+
+
+-----------------
+
+sparse array for GPU
+  use cublas routines by creating new Theano Op
+
+
