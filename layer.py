@@ -475,9 +475,11 @@ class NetworkTrainer(object):
             x, z = zip(*self.training_set[i:i+self.batch_size])
             y, c = self.network.train(np.vstack(x), np.array(z))
             self.monitor.collect_statistics()
-            logging.debug('actual: %5.2f; expected: %s' % (y[0,0], z[0,0]))
-            if self.reporter:
-                self.reporter.update()
+            logging.debug('actual: %s' % (y, ))
+            logging.debug('expected: %s' % (z, ))
+            logging.debug('cost: %s' % (c, ))
+        #if self.reporter:
+         #       self.reporter.update()
 
 
 class DataFeed(object):
@@ -698,7 +700,7 @@ def test():
 
     k = BarsAndStripesTrainingDataSet()
 
-    training_set = k.generate(50)
+    training_set = k.generate(4000)
     validation_set = k.generate(10)
 
     M = NetworkMonitor()
