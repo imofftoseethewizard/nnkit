@@ -9,6 +9,7 @@ import theano
 import theano.tensor as tt
 
 logging.root.setLevel(logging.DEBUG)
+theano.config.compute_test_value = 'warn'
 
 #TODO: image reporter
 #  image shape x,y or x, y, 3
@@ -53,12 +54,29 @@ logging.root.setLevel(logging.DEBUG)
 class LayerComponent(object):
     def attach(self, layer):
         self.layer = layer
+        return self
 
 class Dendrite(LayerComponent):
     pass
 
 
 class CompleteDendrite(Dendrite):
+    def initial_weight(self):
+
+        # This formula is from "Understanding the difficulty of training deep feedforward neural
+        # networks" by Xavier Glorot and Yoshua Bengio.  Ungated paper available at
+        # http://machinelearning.wustl.edu/mlpapers/paper_files/AISTATS2010_GlorotB10.pdf
+
+        rows = self.layer.predecessor.size
+        cols = self.layer.size
+
+        w = math.sqrt(6.0/(rows + cols))
+        return np.random.uniform(-w, w, (rows, cols)).astype(np.single)
+
+                                  
+    def initial_bias(self):
+        return np.zeros((1, self.layer.size), dtype=np.single)
+
     def stimulus(self):
         x = self.layer.input_expr
         W = self.layer.weight
@@ -106,14 +124,14 @@ class LogisticSynapse(Synapse):
     def activity(self):
         y = self.layer.stimulus_expr
 
-        return theano.nnet.sigmoid(y)
+        return tt.nnet.sigmoid(y)
 
 class PositiveSynapse(Synapse):
 
     def activity(self):
         y = self.layer.stimulus_expr
 
-        return tt.switch(y > 0, y, 0))])
+        return tt.switch(y > 0, y, 0)
 
 
 class Objective(LayerComponent):
@@ -143,7 +161,7 @@ class MatchInput(Objective):
 
 class ClassifyInput(Objective):
 
-    def expected_output(self):
+    def expected_value(self):
         z = tt.lvector('z0')
         z.tag.test_value = np.random.randint(0, self.layer.size, (self.layer.batch_size,))
         return z
