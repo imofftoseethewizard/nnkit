@@ -3,11 +3,6 @@ Neural Net Kit
 versions:
   <branch dev>
   0.1-dev.0
-    1st upload to git
-    comments/documentation
-    setup script
-      version system similar to theano
-      examine theano's setup script
     two samples:
       basic classifier
       basic match
@@ -15,13 +10,14 @@ versions:
       image
       histogram
       classification error vs batch
+    1st upload to github
     
   0.1-dev.1
     rbm
+    one or two samples for rbm
     additional reporting
       regeneration
       mpegs
-    one or two samples for rbm
 
   0.1-dev.2
     implement remaining dendrites
@@ -132,9 +128,12 @@ versions:
 
   0.8-dev.0
     audio
+    video
 
   0.9-dev
-    video
+    setup script
+      version system similar to theano
+      examine theano's setup script
   
 
 
