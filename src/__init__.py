@@ -54,6 +54,7 @@ import monitor
 import network
 import objective
 import reporter
+import sink
 import synapse
 import trainer
 import update_rule

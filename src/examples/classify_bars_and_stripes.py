@@ -4,7 +4,7 @@ This example demonstrates supervised backpropagation training in a simple networ
 
 # add the main source directory to the path for the imports below
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../build', )))
 
 # external libraries
 import logging
@@ -19,13 +19,13 @@ logging.root.setLevel(logging.DEBUG)
 theano.config.compute_test_value = 'warn'
 
 # nnkit imports
-from dendrite import CompleteDendrite
-from layer import InputLayer, NeuronLayer, OutputLayer
-from network import Network
-from objective import ClassifyInput
-from synapse import LogisiticSynapse, Synapse
-from trainer import NetworkTrainer
-from update_rule import SimpleBackprop
+from nnkit.dendrite import CompleteDendrite
+from nnkit.layer import InputLayer, NeuronLayer, OutputLayer
+from nnkit.network import Network
+from nnkit.objective import ClassifyInput
+from nnkit.synapse import LogisiticSynapse, Synapse
+from nnkit.trainer import NetworkTrainer
+from nnkit.update_rule import SimpleBackprop
 
 
 class BarsAndStripesTrainingDataSet(object):
