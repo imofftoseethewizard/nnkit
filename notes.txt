@@ -1,9 +1,145 @@
 Neural Net Kit
 --------------
+versions:
+  <branch dev>
+  0.1-dev.0
+    1st upload to git
+    comments/documentation
+    setup script
+      version system similar to theano
+      examine theano's setup script
+    two samples:
+      basic classifier
+      basic match
+    reporting
+      image
+      histogram
+      classification error vs batch
+    
+  0.1-dev.1
+    rbm
+    additional reporting
+      regeneration
+      mpegs
+    one or two samples for rbm
+
+  0.1-dev.2
+    implement remaining dendrites
+    sparse ops for theano
+    one or two sparse samples
+    additional reporting
+      sparsity maps
+
+  0.1-dev.3
+    serialization
+      pickle
+      json
+
+  0.1-dev.4
+    multiple predecessors/costs
+
+  0.1-dev.5
+    error messages and general helpfulness to programmers
+      for classifiers (ClassifyInput objectives)
+        check that each expected output class < # of inputs to network's output layer
+
+  0.1-dev.6
+    optimization
+
+  <branch beta> 0.1-beta.0
+    unit tests
+    integrated tests
+
+  0.1-beta.1
+    ...
+
+  <branch rc> 0.1-rc.0
+    stabilize
+
+  0.1-rc.1
+    ...
+
+  <branch release> 0.1
+
+  0.1.1 
+    maintenance
+    
+  <branch dev> 0.2-dev.0
+    training guards
+      overfitting
+      divergent learning (learning rate too high)
+
+  0.2-dev.1
+    adaptive trainer
+      adjust learning rate vs training error
+      adjust learning rate vs reconstruction error
+
+  0.2-dev.2
+    reporting
+      learning rate adjustments
+      guard status/output
+
+  <stabilize, release>
+
+  0.3-dev.0
+    cd/pcd for decay in backprop
+
+  0.3-dev.1
+    reporting
+      comparative update rules
+    
+  0.3-dev.2
+    samples
+
+  0.3-dev.3
+    optimize
+    
+  <stabilize, release>
+
+  0.4-dev.0
+    grow/prune neurons
+
+  0.4-dev.1
+    samples
+
+  <stabilize, release>
+
+  0.5-dev.0
+    bias feedback
+
+  0.5-dev.1
+    samples
+
+  0.5-dev.3
+    optimize
+    
+  <stabilize, release>
+
+  0.6-dev.0
+    weight feedback
+    aux rbm
+
+  0.6-dev.1
+    samples
+
+  0.6-dev.3
+    optimize
+    
+  <stabilize, release>
+
+  0.7-dev.0
+    mixed supervised/unsupervised training
+
+  0.8-dev.0
+    audio
+
+  0.9-dev
+    video
+  
+
 
 layers
   neuron
-  objective
   input
   output
   sampling
@@ -16,6 +152,7 @@ dendrite types
   sparse
 
 synapse functions
+  tanh
 
 training algorithms
   supervised -- backprop
@@ -77,4 +214,8 @@ E = (F - D)y
 sparse array for GPU
   use cublas routines by creating new Theano Op
 
+
+
+
+Use CD/PCD neg particles instead of weight decay.
 

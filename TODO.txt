@@ -1,0 +1,8 @@
+dendrite.py
+  move gradient calculations from synapse
+
+layer.py
+  move gradient calculations from synapse to dendrite
+
+synapse.py
+  move gradient calculations to dendrite
