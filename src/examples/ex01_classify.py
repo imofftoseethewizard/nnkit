@@ -4,7 +4,7 @@ This example demonstrates supervised backpropagation training in a simple networ
 
 # add the main source directory to the path for the imports below
 import os, sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../../build', )))
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../..', )))
 
 # external libraries
 import logging
@@ -23,7 +23,7 @@ from nnkit.dendrite import CompleteDendrite
 from nnkit.layer import InputLayer, NeuronLayer, OutputLayer
 from nnkit.network import Network
 from nnkit.objective import ClassifyInput
-from nnkit.synapse import LogisiticSynapse, Synapse
+from nnkit.synapse import LogisticSynapse, Synapse
 from nnkit.trainer import NetworkTrainer
 from nnkit.update_rule import SimpleBackprop
 
@@ -93,9 +93,11 @@ def main():
     G = BarsAndStripesTrainingDataSet()
 
     # create the training set.
-    training_set = G.generate(4000)
+    training_set = G.generate(1000)
+    validation_set = None
 
-    # Create the trainer
+    # Create the trainer. verbose=True tells the trainer to report training progress to the root
+    # logger.
     T = NetworkTrainer(N, training_set, validation_set, batch_size=10, verbose=True)
 
     # Prepare the network for training.  This constructs and compiles the computation graph for 

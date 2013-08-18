@@ -20,6 +20,7 @@ import os
 import theano
 import theano.tensor as tt
 
+from sink import DataSink
 
 class DataReporter(object):
     '''

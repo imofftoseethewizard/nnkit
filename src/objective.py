@@ -38,6 +38,13 @@ class MatchInput(Objective):
     pass through from its input.
     '''
 
+    def size(self):
+        '''
+        The output of an OutputLayer with a MatchInput objective is simply its input.
+        '''
+        return self.layer.predecessor.size
+
+
     def expected_output(self):
         '''
         Returns a symbolic variable for use as the expected output parameter to the network.  The
@@ -71,6 +78,13 @@ class ClassifyInput(Objective):
     regression.  The number of classes of output is equal to the size of the input to attached
     output layer.
     '''
+
+    def size(self):
+        '''
+        The output of an OutputLayer with a ClassifyInput objective is always a single item.
+        '''
+        return 1
+
 
     def expected_value(self):
         '''

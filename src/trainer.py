@@ -27,7 +27,8 @@ class NetworkTrainer(object):
     A simple class that prepares a network, trains it, and reports the results.
     '''
     def __init__(self, network, training_set, validation_set,
-                 batch_size, protocol=None, monitor=None, reporter=None):
+                 batch_size, protocol=None, monitor=None, reporter=None,
+                 verbose=False):
         '''
         `protocol` is currently unused, but is intended to supply parameters to the
         training method.
@@ -39,6 +40,7 @@ class NetworkTrainer(object):
         self.protocol = protocol
         self.monitor = monitor or NetworkMonitor()
         self.reporter = reporter or DataReporter()
+        self.verbose = verbose
 
 
     def prepare(self):
@@ -50,7 +52,7 @@ class NetworkTrainer(object):
         self.network.input_layer.set_batch_size(self.batch_size)
 
         # Construct computation graphs, optimize, and compile.
-        self.network.prepare_supevised_training()
+        self.network.prepare_supervised_training()
 
 
     def train(self):
@@ -62,9 +64,8 @@ class NetworkTrainer(object):
             x, z = zip(*self.training_set[i:i+self.batch_size])
             y, c = self.network.train(np.vstack(x), np.array(z))
             self.monitor.collect_statistics()
-            logging.debug('actual: %s' % (y, ))
-            logging.debug('expected: %s' % (z, ))
-            logging.debug('cost: %s' % (c, ))
-        #if self.reporter:
-         #       self.reporter.update()
+            if self.verbose:
+                logging.debug('%%error: %6.2f; cost: %s' % (100.0*np.argwhere(y != z).size/self.batch_size, c, ))
+            if self.reporter:
+                self.reporter.update()
 

@@ -12,6 +12,7 @@ import logging
 import theano
 import theano.tensor as tt
 
+from layer import OutputLayer
         
 class Network(object):
     '''
@@ -84,13 +85,13 @@ class Network(object):
 
         self.train = theano.function(inputs=(self.input_layer.value, self.output_layer.expected_value),
                                      outputs=(self.output_layer.output_expr, self.output_layer.cost_expr),
-                                     updates=sum((l.updates for l in layers), []))
+                                     updates=sum((l.updates for l in self.layers), []))
 
 
     def prepare_evaluation(self):
         '''
         Prepares the network for evaluating input.  This will create a static network with
-        no backpropagation.  This method will add a ``evaluate`` method to its instance.
+        no backpropagation.  This method will add an ``eval`` method to its instance.
         '''
         layers = [self.input_layer]
         idx = 0

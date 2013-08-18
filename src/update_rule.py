@@ -20,6 +20,8 @@ import random
 import theano
 import theano.tensor as tt
 
+from component import LayerComponent
+
 class UpdateRule(LayerComponent):
     '''
     Abstract base class.

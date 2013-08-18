@@ -140,8 +140,6 @@ class Layer(object):
         Called after ``prepare_activation`` and after all successors have completed
         ``prepare_backprop``.
         '''
-        # ensure that all tapped expressions have an associated shared variable.
-        self.prepare_taps()
         self.backprop_ready = True
 
 
@@ -176,7 +174,7 @@ class OutputLayer(Layer):
         ``ClassifyInput``.
         '''
         self.objective = objective.attach(self)
-        super(OutputLayer, self).__init__(*args, **kwargs)
+        super(OutputLayer, self).__init__(size=None, *args, **kwargs)
 
     def prepare_activation(self):
         '''
@@ -185,6 +183,7 @@ class OutputLayer(Layer):
         (relative to the expected value).
         '''
         self.input_expr = self.predecessor.output_expr
+        self.size = self.objective.size()
 
         self.expected_value = self.objective.expected_value()
         self.output_expr = self.objective.output()
