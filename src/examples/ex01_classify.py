@@ -111,7 +111,7 @@ def main():
     validation_set = None
 
     # Create the trainer.
-    T = NetworkTrainer(N, training_set, validation_set, batch_size=10, monitor=M, reporter=R)
+    T = NetworkTrainer(N, training_set, validation_set, batch_size=10, training_monitor=M, training_reporter=R)
 
     # Prepare the network for training.  This constructs and compiles the computation graph for 
     # training the network.

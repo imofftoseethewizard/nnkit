@@ -144,6 +144,5 @@ class ClassifyInput(Objective):
         x = self.layer.input_expr
         y = self.layer.expected_value_var
 
-        #return tt.nnet.softmax(x)[tt.arange(self.layer.batch_size), 0]
         return -tt.mean(tt.log(tt.nnet.softmax(x))[tt.arange(self.layer.batch_size), y.flatten()])
 

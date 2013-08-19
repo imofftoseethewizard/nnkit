@@ -91,10 +91,10 @@ def main():
     N = Network(layers=layers)
 
     # Create the data generator.
-    G = CirclesTrainingDataSet()
+    D = CirclesTrainingDataSet()
 
     # create the training set.
-    training_set = G.generate(1000)
+    training_set = D.generate(1000)
     validation_set = None
 
     # Create the trainer.
