@@ -38,7 +38,22 @@ class Dendrite(LayerComponent):
     '''
     Dendrite is an abstract base class, and a trivial subclass of LayerComponent.
     '''
-    pass
+    def weight_gradient(self):
+        '''
+        '''
+        c = self.layer.cost_expr
+        W = self.layer.weight
+
+        return tt.grad(c, W)
+
+
+    def bias_gradient(self):
+        '''
+        '''
+        c = self.layer.cost_expr
+        b = self.layer.bias
+
+        return tt.grad(c, b)
 
 
 class CompleteDendrite(Dendrite):

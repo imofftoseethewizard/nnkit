@@ -83,7 +83,7 @@ class Network(object):
         # batch of expected output; it returns a batch of resulting output, and the cost
         # associated with that batch.
 
-        self.train = theano.function(inputs=(self.input_layer.value, self.output_layer.expected_value),
+        self.train = theano.function(inputs=(self.input_layer.value_var, self.output_layer.expected_value_var),
                                      outputs=(self.output_layer.output_expr, self.output_layer.cost_expr),
                                      updates=sum((l.updates for l in self.layers), []))
 
@@ -106,7 +106,7 @@ class Network(object):
 
         self.layers = layers
 
-        self.eval = theano.function(inputs=(self.input_layer.value,),
+        self.eval = theano.function(inputs=(self.input_layer.value_var,),
                                     outputs=(self.output_layer.output_expr,))
                                     
 

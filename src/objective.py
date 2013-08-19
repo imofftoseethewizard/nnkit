@@ -2,11 +2,11 @@
 Objective instances determine the function that the training algorithm attempts to optimize in its
 changes to model parameters, and they specify the shape of the output.
 
-There are two classes of objective: ClosestMatch and ClassifyInput.  ClosestMatch instances induce
+There are two classes of objective: BestFit and ClassifyInput.  BestFit instances induce
 minimization of the L2 difference (Euclidean distance) between the evaluated output and the
 expected output; network output is the same as the input to the output layer containing the
-ClosestMatch instance. ClassifyInput instances cause the network to use logistic regression, and
-to return a single unsigned integer for each input indicating the class it most likely belongs to.
+BestFit instance. ClassifyInput instances cause the network to use logistic regression, and to
+return a single unsigned integer for each input indicating the class it most likely belongs to.
 '''
 __authors__   = "Pat Lasswell"
 __copyright__ = "(c) 2013"
@@ -31,28 +31,36 @@ class Objective(LayerComponent):
     pass
 
 
-class MatchInput(Objective):
+class BestFit(Objective):
     '''
-    A MatchInput component attached to an output layer causes the network to implement a least
+    An BestFit component attached to an output layer causes the network to implement a least
     mean squares optimization of the model weights.  The output layer's output will be a simple
     pass through from its input.
     '''
 
     def size(self):
         '''
-        The output of an OutputLayer with a MatchInput objective is simply its input.
+        The output of an OutputLayer with a best fit objective is simply its input.
         '''
         return self.layer.predecessor.size
 
 
-    def expected_output(self):
+    def expected_value(self):
         '''
         Returns a symbolic variable for use as the expected output parameter to the network.  The
         variable is tagged with an appropriate test value.
         '''
-        z = tt.lvector('z0')
-        z.tag.test_value = np.random.randint(0, self.layer.size, (self.layer.batch_size,))
+        z = tt.matrix('z0')
+        z.tag.test_value = np.random.uniform(0, 1, (self.layer.batch_size, self.layer.size)).astype(np.single)
         return z
+
+
+    def initial_expected_value(self):
+        '''
+        Returns an initial value suitable for the shared variable which will be used by taps
+        to capture the value of the expected value.
+        '''
+        return np.zeros((self.layer.batch_size, self.layer.size), dtype=np.int64)
 
 
     def output(self):
@@ -62,12 +70,20 @@ class MatchInput(Objective):
         return self.layer.input_expr
 
 
+    def initial_output(self):
+        '''
+        Returns an initial value suitable for the shared variable which will be used by taps
+        to capture the value of the output.
+        '''
+        return np.zeros((self.layer.batch_size, self.layer.size), dtype=np.single)
+
+
     def cost(self):
         '''
         Returns the mean squared difference between the output and the expected output.
         '''
-        x = self.layer.input_expr
-        y = self.layer.expected_value
+        x = self.layer.output_expr
+        y = self.layer.expected_value_var
 
         return tt.mean((y - x)**2)
 
@@ -91,9 +107,17 @@ class ClassifyInput(Objective):
         Returns a symbolic variable for use as the expected output parameter to the network.  The
         variable is tagged with an appropriate test value.
         '''
-        z = tt.lvector('z0')
-        z.tag.test_value = np.random.randint(0, self.layer.size, (self.layer.batch_size,))
+        z = tt.lmatrix('z0')
+        z.tag.test_value = np.random.randint(0, self.layer.size, (self.layer.batch_size, 1))
         return z
+
+
+    def initial_expected_value(self):
+        '''
+        Returns an initial value suitable for the shared variable which will be used by taps
+        to capture the value of the expected value.
+        '''
+        return np.zeros((self.layer.batch_size, 1), dtype=np.int64)
 
 
     def output(self):
@@ -102,7 +126,15 @@ class ClassifyInput(Objective):
         the attached layer's input.
         '''
         x = self.layer.input_expr
-        return tt.argmax(tt.nnet.softmax(x), axis=1)
+        return tt.flatten(tt.argmax(tt.nnet.softmax(x), axis=1))
+
+
+    def initial_output(self):
+        '''
+        Returns an initial value suitable for the shared variable which will be used by taps
+        to capture the value of the output.
+        '''
+        return np.zeros(self.layer.batch_size, dtype=np.int64)
 
 
     def cost(self):
@@ -110,7 +142,8 @@ class ClassifyInput(Objective):
         Returns the average negative log probability of the expected output.
         '''
         x = self.layer.input_expr
-        y = self.layer.expected_value
+        y = self.layer.expected_value_var
 
-        return -tt.mean(tt.log(tt.nnet.softmax(x))[tt.arange(y.shape[0]), y])
+        #return tt.nnet.softmax(x)[tt.arange(self.layer.batch_size), 0]
+        return -tt.mean(tt.log(tt.nnet.softmax(x))[tt.arange(self.layer.batch_size), y.flatten()])
 

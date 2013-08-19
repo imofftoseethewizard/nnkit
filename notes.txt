@@ -4,8 +4,8 @@ versions:
   <branch dev>
   0.1-dev.0
     two samples:
-      basic classifier
-      basic match
+      x basic classifier
+      x basic match
     reporting
       image
       histogram

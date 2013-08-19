@@ -20,9 +20,13 @@ theano.config.compute_test_value = 'warn'
 
 # nnkit imports
 from nnkit.dendrite import CompleteDendrite
+from nnkit.feed import DataFeed
 from nnkit.layer import InputLayer, NeuronLayer, OutputLayer
+from nnkit.monitor import NetworkMonitor
 from nnkit.network import Network
 from nnkit.objective import ClassifyInput
+from nnkit.reporter import ClassificationErrorReporter
+from nnkit.sink import LoggingDataSink
 from nnkit.synapse import LogisticSynapse, Synapse
 from nnkit.trainer import NetworkTrainer
 from nnkit.update_rule import SimpleBackprop
@@ -56,7 +60,7 @@ class BarsAndStripesTrainingDataSet(object):
                 img[x, :] = 1
                 
     
-            result.append((img.reshape(1, -1).astype(np.single), np.uint32(x)))
+            result.append((img.reshape(1, -1).astype(np.single), np.array([x], dtype=np.int64)))
         return result
 
 
@@ -89,16 +93,25 @@ def main():
     # the input layer, eg N = Network(input_layer=L_input).
     N = Network(layers=layers)
 
+    # Create a monitor and have it watch the output layer.
+    M = NetworkMonitor().watch(layers[-1], labels=['expected_value', 'output'])
+
+    # Compute the classification error over the last 100 items (100 is the default window size
+    # when computing the moving average).
+
+    R = ClassificationErrorReporter(feeds={ 'expected_value': DataFeed(M, layers[-1], 'expected_value'),
+                                            'output':         DataFeed(M, layers[-1], 'output') },
+                                    sink=LoggingDataSink())
+
     # Create the data generator.
     G = BarsAndStripesTrainingDataSet()
 
     # create the training set.
-    training_set = G.generate(1000)
+    training_set = G.generate(1500)
     validation_set = None
 
-    # Create the trainer. verbose=True tells the trainer to report training progress to the root
-    # logger.
-    T = NetworkTrainer(N, training_set, validation_set, batch_size=10, verbose=True)
+    # Create the trainer.
+    T = NetworkTrainer(N, training_set, validation_set, batch_size=10, monitor=M, reporter=R)
 
     # Prepare the network for training.  This constructs and compiles the computation graph for 
     # training the network.

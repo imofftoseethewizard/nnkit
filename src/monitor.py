@@ -8,6 +8,8 @@ __contact__   = "imofftoseethewizard@github.com"
 
 __docformat__ = "restructuredtext en"
 
+import logging
+
 class NetworkMonitor(object):
     '''
     NetworkMonitor instances collect values from network layers.  The main functions are to ensure that
@@ -21,7 +23,7 @@ class NetworkMonitor(object):
         self.reset()
 
 
-    def add_subject(self, layer, label=None, labels=None):
+    def watch(self, layer, label=None, labels=None):
         '''
         Adds a tap for the labels given.  If no labels are specified, all available taps will be
         added.

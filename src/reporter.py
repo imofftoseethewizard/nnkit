@@ -111,9 +111,56 @@ class HistogramReporter(ImageReporter):
         self.hist_range = hist_range
         super(HistogramReporter, self).__init__(*args, **kwargs)
 
+
     def render(self, data):
         '''
         Use matplotlib to render data as a histogram.
         '''
         return plt.hist(data, bins=self.bin_count, range=self.hist_range)
 
+
+class ClassificationErrorReporter(DataReporter):
+    '''
+    Computes the classification error using a simple moving average.
+    '''
+
+    def __init__(self, window_size=100, label='classification error', *args, **kwargs):
+        '''
+        `window_size` gives the minimum number of expected/output pairs that are used in computing
+        the moving average.  It may use slightly more if the batch size does not divide the window
+        size.
+        '''
+        super(ClassificationErrorReporter, self).__init__(*args, **kwargs)
+
+        self.window_size = window_size
+        self.label = label
+
+
+    def fetch(self):
+        '''
+        For each feed in the feeds dictionary, get all data available.
+        '''
+        data = dict()
+        for label, feed in self.feeds.items():
+            data[label] = feed.get_all()
+
+        return data
+
+    
+    def render(self, data):
+        '''
+        Compute a simple moving average over the last few training batches.
+        '''
+        expected_value = data['expected_value']
+        output = data['output']
+
+        batch_size = output[0].size
+        batches = int(math.ceil(self.window_size/batch_size))
+
+        n = max(0, len(output) - batches)
+
+        e = np.array(expected_value[n:]).flatten()[-self.window_size:]
+        o = np.array(output[n:]).flatten()[-self.window_size:]
+
+        return '%s: %6.2f%%' % (self.label, 100.0*np.count_nonzero(e - o)/len(o))
+        

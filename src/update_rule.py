@@ -26,7 +26,35 @@ class UpdateRule(LayerComponent):
     '''
     Abstract base class.
     '''
-    pass
+    def __init__(self, weight_learning_rate=0.2, bias_learning_rate=0.2, weight_momentum=0.5, bias_momentum=0.5,
+                 weight_decay=0.0, bias_decay=0.0):
+
+        self.weight_learning_rate = theano.shared(np.single(weight_learning_rate), 'lW')
+        self.bias_learning_rate   = theano.shared(np.single(bias_learning_rate), 'lb')
+
+        self.weight_momentum = theano.shared(np.single(weight_momentum), 'mW')
+        self.bias_momentum   = theano.shared(np.single(bias_momentum), 'mb')
+
+        self.weight_decay = theano.shared(np.single(weight_decay), 'rW')
+        self.bias_decay   = theano.shared(np.single(bias_decay), 'rb')
+
+
+    def get_parameters(self):
+        '''
+        Returns a dictionary which contains a selection of the update_rule's properties.  It is not
+        intended to be used to support persistance, but as a source of diagnostic information.
+        '''
+        d = super(UpdateRule, self).get_parameters()
+
+        d.update({ 'weight_learning_rate': self.weight_learning_rate.get_value(),
+                   'weight_momentum':      self.weight_momentum.get_value(),
+                   'weight_decay':         self.weight_decay.get_value(),
+                   'bias_learning_rate':   self.bias_learning_rate.get_value(),
+                   'bias_momentum':        self.bias_momentum.get_value(),
+                   'bias_decay':           self.bias_decay.get_value() })
+
+        return d
+
     
 class SimpleBackprop(UpdateRule):
     '''
@@ -45,18 +73,20 @@ class SimpleBackprop(UpdateRule):
         Returns an expression giving the change in weight.
         '''
         gW = self.layer.weight_gradient_expr
-        lW = self.layer.weight_learning_rate
+        lW = self.weight_learning_rate
 
         return - lW * gW
+
 
     def bias_change(self):
         '''
         Returns an expression giving the change in bias.
         '''
         gb = self.layer.bias_gradient_expr
-        lb = self.layer.bias_learning_rate
+        lb = self.bias_learning_rate
 
         return - lb * gb
+
 
     def updated_weight(self):
         '''
@@ -66,6 +96,7 @@ class SimpleBackprop(UpdateRule):
         dW = self.layer.weight_change_expr
 
         return W + dW
+
 
     def updated_bias(self):
         '''
@@ -77,7 +108,7 @@ class SimpleBackprop(UpdateRule):
         return b + db
 
 
-class BackpropWithMomentum(UpdateRule):
+class BackpropWithMomentum(SimpleBackprop):
     '''
     Implements gradient descent where weight and bias are updated by a exponential moving average
     of the cost gradient
@@ -97,10 +128,11 @@ class BackpropWithMomentum(UpdateRule):
         '''
         dW = self.layer.weight_change
         gW = self.layer.weight_gradient_expr
-        lW = self.layer.weight_learning_rate
-        mW = self.layer.weight_momentum
+        lW = self.weight_learning_rate
+        mW = self.weight_momentum
 
         return mW * dW - (1 - mW) * lW * gW
+
 
     def bias_change(self):
         '''
@@ -108,8 +140,8 @@ class BackpropWithMomentum(UpdateRule):
         '''
         db = self.layer.bias_change
         gb = self.layer.bias_gradient_expr
-        lb = self.layer.bias_learning_rate
-        mb = self.layer.bias_momentum
+        lb = self.bias_learning_rate
+        mb = self.bias_momentum
 
         return mb * db - (1 - mb) * lb * gb
 
@@ -133,9 +165,10 @@ class FullBackprop(BackpropWithMomentum):
         '''
         W = self.layer.weight
         dW = self.layer.weight_change_expr
-        rW = self.layer.weight_decay
+        rW = self.weight_decay
 
         return (1 - rW) * W + dW
+
 
     def updated_bias(self):
         '''
@@ -143,7 +176,7 @@ class FullBackprop(BackpropWithMomentum):
         '''
         b = self.layer.bias
         db = self.layer.bias_change_expr
-        rb = self.layer.bias_decay
+        rb = self.bias_decay
 
         return (1 - rb) * b + db
 

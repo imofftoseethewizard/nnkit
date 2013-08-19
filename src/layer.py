@@ -2,7 +2,7 @@
 The layer module aggregates the low-level components of a neural network into basic functional units.
 
 InputLayer and OutputLayer instances supoort input and output; OutputLayer instances also hold the
-Objective component (either a ClosestMatch or a ClassifyInput instance) which determines the cost
+Objective component (either a BestFit or a ClassifyInput instance) which determines the cost
 function to be minimized.  NeuronLayer instances perform most of the computations, each containing
 a Dendrite instance to describe the connections between Layer instances, a Synapse instance to
 compute the output of the layer, and and UpdateRule instance which provides the method of updating
@@ -29,6 +29,10 @@ class Layer(object):
     Layer is an abstract base class.  It implements basic connectivity (predecessor/successors), and
     provides a means for NetworkMonitor instances to collect intermediate computations.
     '''
+
+    expr_based_tap_labels = []
+    var_based_tap_labels = []
+
     def __init__(self, size=None, batch_size=None, predecessor=None):
 
         self.size = size
@@ -110,6 +114,9 @@ class Layer(object):
             if label in self.expr_based_tap_labels:
                 self.updates.append((getattr(self, label), getattr(self, label + '_expr')))
 
+            if label in self.var_based_tap_labels:
+                self.updates.append((getattr(self, label), getattr(self, label + '_var')))
+
 
     def get_parameters(self):
         '''
@@ -148,6 +155,14 @@ class InputLayer(Layer):
     '''
     InputLayer instances connect input values to the computation graph.
     '''
+
+    tap_labels = ['input',
+                  'output',
+                  ]
+
+    expr_based_tap_labels = ['output']
+    var_based_tap_labels = ['input']
+
     def prepare_activation(self):
         '''
         Creates the symbolic variable to hold a batch of input; this same variable is the layer's
@@ -155,9 +170,11 @@ class InputLayer(Layer):
         '''
         assert self.predecessor is None
 
-        self.value = tt.matrix('x0')
-        self.value.tag.test_value = np.random.rand(self.batch_size, self.size).astype(np.single)
-        self.output_expr = self.value
+        self.value_var = tt.matrix('x0')
+        self.value_var.tag.test_value = np.random.rand(self.batch_size, self.size).astype(np.single)
+        self.value = theano.shared(np.zeros((self.batch_size, self.size), dtype=np.single), 'x0')
+
+        self.output_expr = self.value_var
 
         super(InputLayer, self).prepare_activation()
 
@@ -168,13 +185,36 @@ class OutputLayer(Layer):
     from, but also contain the network Objective, a component that describes the function which
     the training process attempts to optimize.
     '''
+
+    # These are the attribute names of shared variables that can be tapped by a NetworkMonitor.
+
+    tap_labels = ['cost',
+                  'expected_value',
+                  'output',
+                  ]
+
+    expr_based_tap_labels = ['cost', 'output']
+    var_based_tap_labels = ['expected_value']
+
+
     def __init__(self, objective, *args, **kwargs):
         '''
-        The ``objective`` parameter should be an instance of either ``ClosestMatch`` or
+        The ``objective`` parameter should be an instance of either ``BestFit`` or
         ``ClassifyInput``.
         '''
         self.objective = objective.attach(self)
         super(OutputLayer, self).__init__(size=None, *args, **kwargs)
+
+
+    def get_parameters(self):
+        '''
+        Returns a dictionary which contains a selection of the layer's properties.  It is not
+        intended to be used to support persistance, but as a source of diagnostic information.
+        '''
+        d = super(OutputLayer, self).get_parameters()
+        d.update({ 'objective': self.objective.get_parameters() })
+        return d
+
 
     def prepare_activation(self):
         '''
@@ -185,9 +225,13 @@ class OutputLayer(Layer):
         self.input_expr = self.predecessor.output_expr
         self.size = self.objective.size()
 
-        self.expected_value = self.objective.expected_value()
+        self.expected_value_var = self.objective.expected_value()
         self.output_expr = self.objective.output()
         self.cost_expr = self.objective.cost()
+
+        self.expected_value = theano.shared(self.objective.initial_expected_value(), 'z0')
+        self.output = theano.shared(self.objective.initial_output(), 'z')
+        self.cost = theano.shared(np.single(0), 'c')
 
         super(OutputLayer, self).prepare_activation()
 
@@ -218,25 +262,9 @@ class NeuronLayer(Layer):
 
     expr_based_tap_labels = ['weight_gradient', 'bias_gradient', 'stimulus', 'output']
     
-    def __init__(self, dendrite, synapse, update_rule,
-                 weight_learning_rate=0.2, bias_learning_rate=0.2,
-                 weight_momentum=0.5, bias_momentum=0.5,
-                 weight_decay=0.0, bias_decay=0.0,
-                 *args, **kwargs):
+    def __init__(self, dendrite, synapse, update_rule, *args, **kwargs):
         '''
         '''
-
-        # the following six parameters control the behavior of the UpdateRule.  See
-        # update_rule.py.
-
-        self.weight_learning_rate = theano.shared(np.single(weight_learning_rate), 'lW')
-        self.bias_learning_rate   = theano.shared(np.single(bias_learning_rate), 'lb')
-
-        self.weight_momentum = theano.shared(np.single(weight_momentum), 'mW')
-        self.bias_momentum   = theano.shared(np.single(bias_momentum), 'mb')
-
-        self.weight_decay = theano.shared(np.single(weight_decay), 'rW')
-        self.bias_decay   = theano.shared(np.single(bias_decay), 'rb')
 
         # attach components to this layer.  See component.py.
 
@@ -254,12 +282,9 @@ class NeuronLayer(Layer):
         '''
         d = super(NeuronLayer, self).get_parameters()
 
-        d.update({ 'weight_learning_rate': self.weight_learning_rate.get_value(),
-                   'weight_momentum':      self.weight_momentum.get_value(),
-                   'weight_decay':         self.weight_decay.get_value(),
-                   'bias_learning_rate':   self.bias_learning_rate.get_value(),
-                   'bias_momentum':        self.bias_momentum.get_value(),
-                   'bias_decay':           self.bias_decay.get_value() })
+        d.update({ 'dendrite':    self.dendrite.get_parameters(),
+                   'synapse':     self.synapse.get_parameters(),
+                   'update_rule': self.update_rule.get_parameters() })
 
         return d
 
@@ -306,8 +331,8 @@ class NeuronLayer(Layer):
         self.cost_expr = self.successors[0].cost_expr
         assert len(self.successors) == 1 or all(l.cost_expr == self.cost_expr for l in self.successors)
                 
-        self.weight_gradient_expr = self.synapse.weight_gradient()
-        self.bias_gradient_expr   = self.synapse.bias_gradient()
+        self.weight_gradient_expr = self.dendrite.weight_gradient()
+        self.bias_gradient_expr   = self.dendrite.bias_gradient()
 
         self.weight_change_expr = self.update_rule.weight_change()
         self.bias_change_expr   = self.update_rule.bias_change()

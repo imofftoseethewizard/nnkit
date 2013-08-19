@@ -32,8 +32,15 @@ class DataFeed(object):
 
     def get_latest(self):
         '''
-        Returns the latest value recorded by the underlying monitor.
+        Returns the latest value recorded by the associated monitor.
         '''
         return self.monitor.get_statistics(self.layer, self.label)[-1]
+
+
+    def get_all(self):
+        '''
+        Returns all values recorded by the associated monitor.
+        '''
+        return self.monitor.get_statistics(self.layer, self.label)
 
 

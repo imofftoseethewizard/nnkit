@@ -13,10 +13,10 @@ acts as a pass-through, f(x) = x; LogisticSynapse implements the logistic sigmoi
 f(x) = 1/(1 + exp(-x)); and PositiveSynapse implements a negative-truncated linear function,
 f(x) = x if x >= 0, f(x) = 0 otherwise.
 
-Objective objects wrap the cost function for supervised learning.  There are currently two objectives:
-ClosestMatch and ClassifyInput.  ClosestMatch attempts to minimize the L2 (Euclidean distance) between
-the training data and the predicted output.  ClassifyInput attempts to determine the most likely class
-of the input.
+Objective objects wrap the cost function for supervised learning.  There are currently two
+objectives: BestFit and ClassifyInput.  BestFit attempts to minimize the L2 (Euclidean distance)
+between the training data and the predicted output.  ClassifyInput attempts to determine the most
+likely class of the input.
 
 UpdateRule objects describe how the model parameters are updated.  Update rule has several
 subclasses: SimpleBackprop provides a no-momentum, no-decay gradient descent; BackpropWithMomentum

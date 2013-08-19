@@ -1,8 +1,13 @@
-dendrite.py
-  move gradient calculations from synapse
+network.py
+  return function from prepare, do not add to instance?
 
-layer.py
-  move gradient calculations from synapse to dendrite
+monitor.py
+  improve monitor constructor
+  monitor creates feeds on demand
 
-synapse.py
-  move gradient calculations to dendrite
+trainer.py
+  test set
+  changes for error reporter
+
+
+

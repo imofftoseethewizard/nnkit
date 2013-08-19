@@ -23,26 +23,6 @@ class Synapse(LayerComponent):
     Base class. Implements f(x) = x.
     '''
 
-    def weight_gradient(self):
-        '''
-        This and `bias_gradient` should probably be moved to Dendrite.
-        '''
-        c = self.layer.cost_expr
-        W = self.layer.weight
-
-        return tt.grad(c, W)
-
-
-    def bias_gradient(self):
-        '''
-        This and `weight_gradient` should probably be moved to Dendrite.
-        '''
-        c = self.layer.cost_expr
-        b = self.layer.bias
-
-        return tt.grad(c, b)
-
-
     def activity(self):
         '''
         Returns an expression for the layer output.  In this case, it is simply the weighted and biased

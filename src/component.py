@@ -23,3 +23,13 @@ class LayerComponent(object):
         '''
         self.layer = layer
         return self
+
+
+    def get_parameters(self):
+        '''
+        Returns a dictionary which contains a selection of the component's properties.  It is not
+        intended to be used to support persistance, but as a source of diagnostic information.
+        '''
+        return { '__class__':  self.__class__.__name__ }
+
+
