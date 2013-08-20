@@ -6,12 +6,14 @@ versions:
     two samples:
       x basic classifier
       x basic match
-    validation data, monitor, reporting
+    x validation data, monitor, reporting
     reporting
-      image
+      x image
       histogram
+      x input/output comparison images
       x classification error vs batch
-    1st upload to github
+    x 1st upload to github
+    x add version
     
   0.1-dev.1
     rbm

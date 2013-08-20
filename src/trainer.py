@@ -94,7 +94,7 @@ class NetworkTrainer(object):
         '''
         for i in range(self.training_batches):
             self.train_batch(i)
-            if (i + 1) % self.validation_interval == 0:
+            if i % self.validation_interval == 0:
                 self.validate()
 
 
@@ -112,7 +112,6 @@ class NetworkTrainer(object):
         '''
         self.network.validate(*self.get_validation_batch(i))
         self.validation_monitor.collect_statistics()
-        self.validation_reporter.update()
 
 
     def validate(self):
@@ -120,3 +119,4 @@ class NetworkTrainer(object):
         Validates the network against the full set of validation data.
         '''
         for i in range(self.validation_batches): self.validate_batch(i)
+        self.validation_reporter.update()

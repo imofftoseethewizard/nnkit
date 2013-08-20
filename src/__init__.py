@@ -58,3 +58,10 @@ import sink
 import synapse
 import trainer
 import update_rule
+
+def version():
+    '''
+    Returns a tuple of major version, minor version, branch ('dev', 'beta', 'rc', 'stable'), and
+    sequence.
+    '''
+    return (0, 1, 'dev', 0)

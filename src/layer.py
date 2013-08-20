@@ -180,6 +180,9 @@ class InputLayer(Layer):
 
         self.output_expr = self.value_var
 
+        self.input = theano.shared(np.zeros((self.batch_size, self.size), dtype=np.single), 'x0')
+        self.output = theano.shared(np.zeros((self.batch_size, self.size), dtype=np.single), 'z')
+
         super(InputLayer, self).prepare_activation()
 
 

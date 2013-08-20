@@ -93,14 +93,14 @@ def main():
     # the input layer, eg N = Network(input_layer=L_input).
     N = Network(layers=layers)
 
-    # Create a monitor and have it watch the output layer.
-    M = NetworkMonitor().watch(layers[-1], labels=['expected_value', 'output'])
+    # Create a monitor to capture values from the network.
+    M = NetworkMonitor()
 
     # Compute the classification error over the last 100 items (100 is the default window size
     # when computing the moving average).
 
-    R = ClassificationErrorReporter(feeds={ 'expected_value': DataFeed(M, layers[-1], 'expected_value'),
-                                            'output':         DataFeed(M, layers[-1], 'output') },
+    R = ClassificationErrorReporter(expected_value_feed=DataFeed(M, layers[-1], 'expected_value'),
+                                    output_feed=DataFeed(M, layers[-1], 'output'),
                                     sink=LoggingDataSink())
 
     # Create the data generator.

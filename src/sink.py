@@ -50,7 +50,7 @@ class FileSystemDataSink(DataSink):
         self.base_name = base_name
         self.extension = extension
         self.count = 0
-        self.link_path = os.path.join(self.root_dir, base_name, extension)
+        self.link_path = os.path.join(self.root_dir, base_name + '.' + extension)
         if not os.path.exists(self.root_dir):
             os.makedirs(self.root_dir)
 
@@ -94,7 +94,7 @@ class FileSystemImageSink(FileSystemDataSink):
         Converts the result to an image before saving.  Image type is determined by the `extension`
         parameter to the constructor.
         '''
-        cv2.imwrite(result, self.get_result_destination())
+        cv2.imwrite(self.get_result_destination(), result)
         self.update_current_link()
         self.count += 1
 

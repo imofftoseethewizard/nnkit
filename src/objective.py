@@ -60,7 +60,7 @@ class BestFit(Objective):
         Returns an initial value suitable for the shared variable which will be used by taps
         to capture the value of the expected value.
         '''
-        return np.zeros((self.layer.batch_size, self.layer.size), dtype=np.int64)
+        return np.zeros((self.layer.batch_size, self.layer.size), dtype=np.single)
 
 
     def output(self):

@@ -10,6 +10,7 @@ __contact__   = "imofftoseethewizard@github.com"
 __docformat__ = "restructuredtext en"
 
 import logging
+import numpy as np
 
 class DataFeed(object):
     '''
@@ -29,6 +30,9 @@ class DataFeed(object):
         self.monitor = monitor
         self.layer = layer
         self.label = label
+        
+        self.monitor.watch(layer, label=label)
+
 
     def get_latest(self):
         '''
@@ -44,3 +48,19 @@ class DataFeed(object):
         return self.monitor.get_statistics(self.layer, self.label)
 
 
+class TailingDataFeed(DataFeed):
+    '''
+    '''
+    def __init__(self, monitor, layer, label, tail_length=1):
+        '''
+        '''
+        super(TailingDataFeed, self).__init__(monitor, layer, label)
+        self.tail_length = tail_length
+
+
+    def get_latest(self):
+        '''
+        Returns a slice of length tail_length from the collected data.
+
+        '''
+        return np.vstack(super(TailingDataFeed, self).get_all()[-self.tail_length:])

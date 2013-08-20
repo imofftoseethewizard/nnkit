@@ -9,5 +9,8 @@ trainer.py
   test set
   changes for error reporter
 
+reporter.py
+    compute result shape
+      for x and y 2*margin + 2*grid*border + grid*image + (grid-1)*image_margin
 
 
