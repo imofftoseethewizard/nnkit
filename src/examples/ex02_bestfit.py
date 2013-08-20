@@ -47,7 +47,7 @@ class CirclesTrainingDataSet(object):
         self.blur = blur
         self.noise = noise
 
-    def generate(self, N=1, mean=None):
+    def generate(self, N=1):
         '''
         Generate `N` random labeled noisy circle images; return them as a list of tuples:
         (image, label).
@@ -65,8 +65,6 @@ class CirclesTrainingDataSet(object):
 
             img = img.astype(np.single).reshape(1, -1)
             label = label.astype(np.single).reshape(1, -1)
-            if mean is not None:
-                img -= mean
 
             result.append((img, label))
         return result
@@ -99,9 +97,8 @@ def main():
     D = CirclesTrainingDataSet(image_size=image_size, radius=5, noise=0.1)
 
     # create the training set.
-    mean = np.mean(np.vstack([img for img, label in D.generate(200)]), axis=0)
-    training_set = D.generate(10000, mean)
-    validation_set = D.generate(10, mean)
+    training_set = D.generate(10000)
+    validation_set = D.generate(10)
     
     M = NetworkMonitor()
 
