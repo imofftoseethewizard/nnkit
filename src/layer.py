@@ -47,7 +47,11 @@ class Layer(object):
         self.activation_ready = False
         self.backprop_ready = False
 
-        self.updates = []
+        # These will be lists of tuples suitable for theano.function(..., updates=<list of tuples>, ...)
+
+        self.model_updates = []  # See NeuronLayer.prepare_backprop below.
+        self.tap_updates = []    # See Layer.prepare_taps below.
+
         self.taps = set()
 
 
@@ -112,10 +116,10 @@ class Layer(object):
             # ``weight_gradient`` does not.  Hence ``weight_gradient`` needs to be updated by
             # ``weight_gradient_expr``.
             if label in self.expr_based_tap_labels:
-                self.updates.append((getattr(self, label), getattr(self, label + '_expr')))
+                self.tap_updates.append((getattr(self, label), getattr(self, label + '_expr')))
 
             if label in self.var_based_tap_labels:
-                self.updates.append((getattr(self, label), getattr(self, label + '_var')))
+                self.tap_updates.append((getattr(self, label), getattr(self, label + '_var')))
 
 
     def get_parameters(self):
@@ -340,10 +344,10 @@ class NeuronLayer(Layer):
         self.updated_weight_expr = self.update_rule.updated_weight()
         self.updated_bias_expr   = self.update_rule.updated_bias()
 
-        self.updates += [(self.weight,        self.updated_weight_expr),
-                         (self.bias,          self.updated_bias_expr),
-                         (self.weight_change, self.weight_change_expr),
-                         (self.bias_change,   self.bias_change_expr)]
+        self.model_updates += [(self.weight,        self.updated_weight_expr),
+                               (self.bias,          self.updated_bias_expr),
+                               (self.weight_change, self.weight_change_expr),
+                               (self.bias_change,   self.bias_change_expr)]
 
         super(NeuronLayer, self).prepare_backprop()
 

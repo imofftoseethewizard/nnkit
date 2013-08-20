@@ -85,7 +85,14 @@ class Network(object):
 
         self.train = theano.function(inputs=(self.input_layer.value_var, self.output_layer.expected_value_var),
                                      outputs=(self.output_layer.output_expr, self.output_layer.cost_expr),
-                                     updates=sum((l.updates for l in self.layers), []))
+                                     updates=sum((l.tap_updates + l.model_updates for l in self.layers), []))
+
+        # create validation function.  This differs from the training function only in that it does not
+        # update the any of the model parameters.
+
+        self.validate = theano.function(inputs=(self.input_layer.value_var, self.output_layer.expected_value_var),
+                                        outputs=(self.output_layer.output_expr, self.output_layer.cost_expr),
+                                        updates=sum((l.tap_updates for l in self.layers), []))
 
 
     def prepare_evaluation(self):
