@@ -9,7 +9,7 @@ versions:
     x validation data, monitor, reporting
     reporting
       x image
-      histogram
+      x histogram
       x input/output comparison images
       x classification error vs batch
     x 1st upload to github

@@ -246,21 +246,21 @@ class HistogramReporter(ImageReporter):
     '''
     Produces a histogram from the incoming data.
     '''
-    def init(self, bin_count=10, hist_range=None, *args, **kwargs):
+    def init(self, feed, bin_count=10, hist_range=None, *args, **kwargs):
         '''
         Specify the number of bins with `bin_count` (defaults to 10) and the range over which they
         will be evenly spaced with `range` (defaults to None, implying data min to data max).
         '''
         self.bin_count = bin_count
         self.hist_range = hist_range
-        super(HistogramReporter, self).__init__(*args, **kwargs)
+        super(HistogramReporter, self).__init__(feeds=dict(input=feed), *args, **kwargs)
 
 
     def render(self, data):
         '''
         Use matplotlib to render data as a histogram.
         '''
-        return plt.hist(data, bins=self.bin_count, range=self.hist_range)
+        return plt.hist(data['input'], bins=self.bin_count, range=self.hist_range)
 
 
 class ClassificationErrorReporter(DataReporter):
